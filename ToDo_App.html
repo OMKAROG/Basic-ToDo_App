@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>To Do</title>
+  <style>
+    * { font-family: "Savate", sans-serif; }
+
+    #heading { text-align: center; }
+
+    body { background-color: rgb(234, 185, 241); }
+
+    #inputDiv {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+
+    #addButton {
+      height: 40px;
+      width: 60px;
+      background-color: rgb(8, 215, 8);
+      border: 1px solid;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #addButton:hover {
+      scale: 1.1;
+      transition: 0.5s;
+      background-color: rgb(4, 123, 4);
+    }
+
+    input {
+      border-radius: 5px;
+      border: 1px solid;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    #displayDiv {
+      margin-top: 20px;
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -30%);
+      width: 80vw;
+      border: 1px solid;
+      padding: 10px;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Savate&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <h1 id="heading">To Do App</h1>
+  <div id="inputDiv">
+    <input type="text" placeholder="Enter your Todo" required id="inputTodo">
+    <input type="date" required id="inputDate">
+    <button id="addButton" onclick="AddTodo()">Add</button>
+  </div>
+
+  <div id="displayDiv">
+    <p style="text-align: center;" id="defaultText">Your Todos will display here</p>
+  </div>
+
+  <script>
+    const inputTodo = document.querySelector('#inputTodo');
+    const inputDate = document.querySelector('#inputDate');
+    const displayDiv = document.querySelector('#displayDiv');
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    function saveToLocalStorage() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function AddTodo() {
+      const todoValue = inputTodo.value;
+      const dateValue = inputDate.value;
+
+      if (todoValue === "" || dateValue === "") {
+        alert("Please fill all fields");
+        return;
+      }
+
+      const newTask = { todoValue, dateValue };
+      tasks.push(newTask);
+      saveToLocalStorage();
+      createTodo(newTask, tasks.length - 1); // pass index
+
+      inputTodo.value = "";
+      inputDate.value = "";
+      document.getElementById("defaultText").style.display = "none";
+    }
+
+    function createTodo({ todoValue, dateValue }, index) {
+      let newDiv = document.createElement('div');
+      let todo = document.createElement('p');
+      let date = document.createElement('p');
+      let remove = document.createElement('button');
+
+      todo.innerText = "Task: " + todoValue;
+      date.innerText = "Date: " + dateValue;
+      remove.innerText = "Remove";
+
+      // Style the remove button
+      remove.style.backgroundColor = 'red';
+      remove.style.color = 'white';
+      remove.style.padding = '10px 20px';
+      remove.style.border = 'none';
+      remove.style.borderRadius = '5px';
+      remove.style.cursor = 'pointer';
+      remove.style.fontSize = '16px';
+
+      // Remove logic
+      remove.onclick = () => {
+        newDiv.remove();
+        tasks.splice(index, 1);
+        saveToLocalStorage();
+        if (tasks.length === 0) {
+          document.getElementById("defaultText").style.display = "block";
+        }
+      };
+
+      newDiv.style.display = 'flex';
+      newDiv.style.gap = '10px';
+      newDiv.style.margin = '10px 0';
+      newDiv.style.justifyContent = 'space-between';
+      newDiv.style.alignItems = 'center';
+
+      newDiv.append(todo, date, remove);
+      displayDiv.appendChild(newDiv);
+    }
+
+    // Initial load
+    if (tasks.length === 0) {
+      document.getElementById("defaultText").style.display = "block";
+    } else {
+      document.getElementById("defaultText").style.display = "none";
+      tasks.forEach((task, index) => createTodo(task, index));
+    }
+
+  </script>
+</body>
+</html>
